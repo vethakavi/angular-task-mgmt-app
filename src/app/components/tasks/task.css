@@ -13,6 +13,7 @@
   z-index: 2;
   max-width: 1000px;
   margin: 0 auto;
+  padding-top: 72px;
 }
 
 .tasks-background {
@@ -139,10 +140,12 @@
 }
 
 .user-menu {
-  position: relative;
+  position: fixed;
+  top: 16px;
+  right: 20px;
   width: fit-content;
-  margin-left: auto;
-  margin-bottom: 16px;
+  margin: 0;
+  z-index: 50;
 }
 
 .user-button {
@@ -156,74 +159,6 @@
   color: #111827;
   cursor: pointer;
   font-weight: 600;
-}
-
-.user-button:hover {
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
-}
-
-.avatar {
-  width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: #6366f1;
-  color: white;
-  font-size: 14px;
-}
-
-.user-dropdown {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 10px);
-  min-width: 180px;
-  background: white;
-  border-radius: 14px;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  overflow: hidden;
-  z-index: 10;
-}
-
-.dropdown-link {
-  display: block;
-  width: 100%;
-  padding: 12px 16px;
-  border: none;
-  background: transparent;
-  text-align: left;
-  font-weight: 600;
-  color: #111827;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.dropdown-link:hover {
-  background: #f8fafc;
-}
-
-.logout-button {
-  width: 100%;
-  border: none;
-}
-
-.btn-add-task {
-  display: inline-block;
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  text-decoration: none;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.btn-add-task:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
 }
 
 .user-button:hover {
@@ -705,6 +640,15 @@ input:focus-visible {
     padding: 30px 15px;
   }
 
+  .tasks-content {
+    padding-top: 78px;
+  }
+
+  .user-menu {
+    top: 12px;
+    right: 15px;
+  }
+
   .tasks-header {
     flex-direction: column;
     align-items: flex-start;
@@ -738,6 +682,27 @@ input:focus-visible {
 @media (max-width: 480px) {
   .tasks-container {
     padding: 20px 12px;
+  }
+
+  .tasks-content {
+    padding-top: 84px;
+  }
+
+  .user-menu {
+    top: 10px;
+    right: 12px;
+  }
+
+  .user-button {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .user-name {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .tasks-header h2 {
