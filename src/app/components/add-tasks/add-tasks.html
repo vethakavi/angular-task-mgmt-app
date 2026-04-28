@@ -1,0 +1,80 @@
+<div class="add-task-container">
+  <div class="add-task-background">
+    <div class="tech-badge badge-angular" data-label="Angular"></div>
+    <div class="tech-badge badge-react" data-label="React"></div>
+    <div class="tech-badge badge-ts" data-label="TypeScript"></div>
+    <div class="tech-badge badge-tailwind" data-label="Tailwind"></div>
+    <div class="tech-badge badge-graphql" data-label="GraphQL"></div>
+  </div>
+
+  <div class="add-task-card">
+    <div class="card-header">
+      <h2>Create New Task</h2>
+    </div>
+
+    <form #form class="add-task-form" (ngSubmit)="addTask(titleInput.value, selectedStatus, selectedPriority)">
+      <div class="form-group">
+        <label for="title">Task Title *</label>
+        <input #titleInput id="title" type="text" placeholder="Enter task title" required />
+      </div>
+
+      <div class="form-group">
+        <label>Task Status *</label>
+        <div class="status-options">
+          <label class="radio-option">
+            <input type="radio" name="status" value="todo" [(ngModel)]="selectedStatus" checked />
+            <span class="radio-label">📝 To Do</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="status" value="inprogress" [(ngModel)]="selectedStatus" />
+            <span class="radio-label">⏳ In Progress</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="status" value="completed" [(ngModel)]="selectedStatus" />
+            <span class="radio-label">✓ Completed</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Task Priority *</label>
+        <div class="priority-options">
+          <label class="radio-option">
+            <input type="radio" name="priority" value="low" [(ngModel)]="selectedPriority" checked />
+            <span class="radio-label">🟢 Low</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="priority" value="medium" [(ngModel)]="selectedPriority" />
+            <span class="radio-label">🟡 Medium</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="priority" value="high" [(ngModel)]="selectedPriority" />
+            <span class="radio-label">🔴 High</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- <div class="form-group checkbox">
+        <input #completedInput id="completed" type="checkbox" style="display: none" />
+        <label for="completed" style="display: none">Mark as Completed</label>
+      </div> -->
+
+      @if (statusMessage) {
+        <div
+          class="status-message"
+          [class.success]="statusMessage.includes('successfully')"
+          [class.error]="statusMessage.includes('✗')"
+          [class.warning]="statusMessage.includes('Please')"
+        >
+          {{ statusMessage }}
+        </div>
+      }
+
+      <div class="button-group">
+        <button type="submit" class="btn-submit">Add Task</button>
+      </div>
+    </form>
+
+    <a routerLink="/tasks" class="btn-back">← Back to Tasks</a>
+  </div>
+</div>

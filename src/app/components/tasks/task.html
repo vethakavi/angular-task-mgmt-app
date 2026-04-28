@@ -1,0 +1,202 @@
+<div class="tasks-container">
+  <div class="tasks-background">
+    <div class="tasks-deco badge-angular" data-label="Angular"></div>
+    <div class="tasks-deco badge-react" data-label="React"></div>
+    <div class="tasks-deco badge-rxjs" data-label="RxJS"></div>
+    <div class="tasks-deco badge-ngrx" data-label="NgRx"></div>
+  </div>
+
+  <div class="tasks-content">
+    <div class="user-menu">
+      <button class="user-button" type="button" (click)="toggleUserMenu()">
+        <span class="avatar">{{
+          currentUser()?.name ? currentUser()?.name.charAt(0).toUpperCase() : 'U'
+        }}</span>
+        <span class="user-name">{{
+          currentUser()?.name || currentUser()?.email || 'User'
+        }}</span>
+        <span class="user-caret">▾</span>
+      </button>
+      @if (userDropdownOpen) {
+        <div class="user-dropdown">
+          <a routerLink="/profile" class="dropdown-link" (click)="userDropdownOpen = false"
+            >Profile</a
+          >
+          <button class="dropdown-link logout-button" type="button" (click)="logout()">
+            Logout
+          </button>
+        </div>
+      }
+    </div>
+    <div class="tasks-header">      
+      <div class="tasks-header-left">
+        <h2>My Tasks</h2>
+      </div>
+      <div class="tasks-header-right">
+        <a routerLink="/add-tasks" class="btn-add-task">+ Add New Task</a>
+      </div>
+    </div>
+
+    <div class="tasks-list">
+      @if (tasks.length > 0) {
+        <ul class="task-items">
+          @for (task of tasks; track task._id) {
+            @if (editingTaskId !== task._id) {
+              <li class="task-item">
+                <div class="task-content">
+                  <span class="task-title">{{ task.title }}</span>
+                  <div class="task-badges">
+                    <span class="badge" [ngClass]="'badge-' + task.status">
+                      @if (task.status === 'todo' || task.todo) {
+                        📝 To Do
+                      } @else if (task.status === 'inprogress' || task.inprogress) {
+                        ⏳ In Progress
+                      } @else if (task.status === 'completed' || task.completed) {
+                        ✓ Completed
+                      }
+                    </span>
+                    <span
+                      class="badge priority-badge"
+                      [ngClass]="'priority-' + (task.priority || 'low')"
+                    >
+                      @if (task.priority === 'low' || !task.priority) {
+                        🟢 Low
+                      } @else if (task.priority === 'medium') {
+                        🟡 Medium
+                      } @else if (task.priority === 'high') {
+                        🔴 High
+                      }
+                    </span>
+                  </div>
+                </div>
+                <div class="task-actions">
+                  <button (click)="startEdit(task)" class="btn-edit">Edit</button>
+                  <button (click)="startDelete(task._id)" class="btn-delete">Delete</button>
+                </div>
+              </li>
+            } @else {
+              <!-- Edit Form -->
+              <li class="task-item edit-form">
+                <div class="edit-content">
+                  <input
+                    [(ngModel)]="editingTitle"
+                    class="edit-input"
+                    placeholder="Edit task title"
+                    type="text"
+                  />
+                  <div class="form-group edit-option-group">
+                    <label>Task Status *</label>
+                    <div class="status-edit-options">
+                      <label class="status-radio">
+                        <input
+                          [(ngModel)]="editingStatus"
+                          name="editStatus"
+                          type="radio"
+                          value="todo"
+                        />
+                        <span>📝 To Do</span>
+                      </label>
+                      <label class="status-radio">
+                        <input
+                          [(ngModel)]="editingStatus"
+                          name="editStatus"
+                          type="radio"
+                          value="inprogress"
+                        />
+                        <span>⏳ In Progress</span>
+                      </label>
+                      <label class="status-radio">
+                        <input
+                          [(ngModel)]="editingStatus"
+                          name="editStatus"
+                          type="radio"
+                          value="completed"
+                        />
+                        <span>✓ Completed</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="form-group edit-option-group">
+                    <label>Task Priority *</label>
+                    <div class="priority-edit-options">
+                      <label class="status-radio">
+                        <input
+                          [(ngModel)]="editingPriority"
+                          name="editPriority"
+                          type="radio"
+                          value="low"
+                        />
+                        <span>🟢 Low</span>
+                      </label>
+                      <label class="status-radio">
+                        <input
+                          [(ngModel)]="editingPriority"
+                          name="editPriority"
+                          type="radio"
+                          value="medium"
+                        />
+                        <span>🟡 Medium</span>
+                      </label>
+                      <label class="status-radio">
+                        <input
+                          [(ngModel)]="editingPriority"
+                          name="editPriority"
+                          type="radio"
+                          value="high"
+                        />
+                        <span>🔴 High</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                @if (editStatusMessage) {
+                  <div
+                    class="status-message"
+                    [class.success]="editStatusMessage.includes('successfully')"
+                    [class.error]="
+                      editStatusMessage.includes('Failed') || editStatusMessage.includes('cannot')
+                    "
+                  >
+                    {{ editStatusMessage }}
+                  </div>
+                }
+                <div class="edit-actions">
+                  <button (click)="saveEdit()" class="btn-save">Save</button>
+                  <button (click)="cancelEdit()" class="btn-cancel">Cancel</button>
+                </div>
+              </li>
+            }
+          }
+        </ul>
+      } @else if (hasLoaded) {
+        <div class="empty-state">
+          <p>No tasks yet. Create your first task!</p>
+          <a routerLink="/add-tasks" class="btn-add-task">Create Task</a>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  @if (deletingTaskId) {
+    <div class="modal-overlay">
+      <div class="modal-content">
+        <h3>Delete Task?</h3>
+        <p>Are you sure you want to delete this task? This action cannot be undone.</p>
+        @if (deleteStatusMessage) {
+          <div
+            class="status-message"
+            [class.success]="deleteStatusMessage.includes('successfully')"
+            [class.error]="deleteStatusMessage.includes('Failed')"
+          >
+            {{ deleteStatusMessage }}
+          </div>
+        }
+        <div class="modal-actions">
+          <button (click)="confirmDelete()" class="btn-confirm-delete">Delete</button>
+          <button (click)="cancelDelete()" class="btn-cancel-modal">Cancel</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
