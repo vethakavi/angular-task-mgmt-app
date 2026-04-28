@@ -465,6 +465,20 @@
   color: #555;
 }
 
+.edit-option-group legend {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.edit-option-group fieldset,
+fieldset.edit-option-group {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
 .status-radio {
   display: inline-flex;
   align-items: center;
@@ -662,6 +676,13 @@
 
 .btn-cancel-modal:hover {
   background: #e5e7eb;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid #1d4ed8;
+  outline-offset: 2px;
 }
 
 .empty-state {

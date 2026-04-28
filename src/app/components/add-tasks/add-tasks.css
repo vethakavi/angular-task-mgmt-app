@@ -150,6 +150,19 @@
   font-size: 14px;
 }
 
+.form-group legend {
+  margin-bottom: 8px;
+  color: #555;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+fieldset.form-group {
+  border: 0;
+  margin: 0 0 20px 0;
+  padding: 0;
+}
+
 .form-group input[type="text"],
 .form-group input[type="email"],
 .form-group input[type="password"] {
@@ -326,6 +339,13 @@
 .btn-back:hover {
   background: #e0e0e0;
   transform: translateX(-2px);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid #1d4ed8;
+  outline-offset: 2px;
 }
 
 /* Responsive Design */

@@ -233,6 +233,14 @@
   transform: translateX(-2px);
 }
 
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #1d4ed8;
+  outline-offset: 2px;
+}
+
 .status-message {
   padding: 14px 16px;
   border-radius: 8px;

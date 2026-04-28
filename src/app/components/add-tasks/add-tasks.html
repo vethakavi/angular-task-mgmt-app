@@ -1,5 +1,5 @@
 <div class="add-task-container">
-  <div class="add-task-background">
+  <div class="add-task-background" aria-hidden="true">
     <div class="tech-badge badge-angular" data-label="Angular"></div>
     <div class="tech-badge badge-react" data-label="React"></div>
     <div class="tech-badge badge-ts" data-label="TypeScript"></div>
@@ -15,11 +15,19 @@
     <form #form class="add-task-form" (ngSubmit)="addTask(titleInput.value, selectedStatus, selectedPriority)">
       <div class="form-group">
         <label for="title">Task Title *</label>
-        <input #titleInput id="title" type="text" placeholder="Enter task title" required />
+        <input
+          #titleInput
+          id="title"
+          name="title"
+          type="text"
+          placeholder="Enter task title"
+          required
+          aria-required="true"
+        />
       </div>
 
-      <div class="form-group">
-        <label>Task Status *</label>
+      <fieldset class="form-group">
+        <legend>Task Status *</legend>
         <div class="status-options">
           <label class="radio-option">
             <input type="radio" name="status" value="todo" [(ngModel)]="selectedStatus" checked />
@@ -34,10 +42,10 @@
             <span class="radio-label">✓ Completed</span>
           </label>
         </div>
-      </div>
+      </fieldset>
 
-      <div class="form-group">
-        <label>Task Priority *</label>
+      <fieldset class="form-group">
+        <legend>Task Priority *</legend>
         <div class="priority-options">
           <label class="radio-option">
             <input type="radio" name="priority" value="low" [(ngModel)]="selectedPriority" checked />
@@ -52,7 +60,7 @@
             <span class="radio-label">🔴 High</span>
           </label>
         </div>
-      </div>
+      </fieldset>
 
       <!-- <div class="form-group checkbox">
         <input #completedInput id="completed" type="checkbox" style="display: none" />
@@ -65,6 +73,8 @@
           [class.success]="statusMessage.includes('successfully')"
           [class.error]="statusMessage.includes('✗')"
           [class.warning]="statusMessage.includes('Please')"
+          role="status"
+          aria-live="polite"
         >
           {{ statusMessage }}
         </div>

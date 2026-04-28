@@ -1,5 +1,5 @@
 <div class="tasks-container">
-  <div class="tasks-background">
+  <div class="tasks-background" aria-hidden="true">
     <div class="tasks-deco badge-angular" data-label="Angular"></div>
     <div class="tasks-deco badge-react" data-label="React"></div>
     <div class="tasks-deco badge-rxjs" data-label="RxJS"></div>
@@ -8,7 +8,14 @@
 
   <div class="tasks-content">
     <div class="user-menu">
-      <button class="user-button" type="button" (click)="toggleUserMenu()">
+      <button
+        class="user-button"
+        type="button"
+        (click)="toggleUserMenu()"
+        aria-haspopup="menu"
+        [attr.aria-expanded]="userDropdownOpen"
+        aria-controls="user-menu-dropdown"
+      >
         <span class="avatar">{{
           currentUser()?.name ? currentUser()?.name.charAt(0).toUpperCase() : 'U'
         }}</span>
@@ -18,11 +25,11 @@
         <span class="user-caret">▾</span>
       </button>
       @if (userDropdownOpen) {
-        <div class="user-dropdown">
-          <a routerLink="/profile" class="dropdown-link" (click)="userDropdownOpen = false"
+        <div class="user-dropdown" id="user-menu-dropdown" role="menu">
+          <a routerLink="/profile" class="dropdown-link" role="menuitem" (click)="userDropdownOpen = false"
             >Profile</a
           >
-          <button class="dropdown-link logout-button" type="button" (click)="logout()">
+          <button class="dropdown-link logout-button" role="menuitem" type="button" (click)="logout()">
             Logout
           </button>
         </div>
@@ -70,22 +77,24 @@
                   </div>
                 </div>
                 <div class="task-actions">
-                  <button (click)="startEdit(task)" class="btn-edit">Edit</button>
-                  <button (click)="startDelete(task._id)" class="btn-delete">Delete</button>
+                  <button type="button" (click)="startEdit(task)" class="btn-edit">Edit</button>
+                  <button type="button" (click)="startDelete(task._id)" class="btn-delete">Delete</button>
                 </div>
               </li>
             } @else {
               <!-- Edit Form -->
               <li class="task-item edit-form">
-                <div class="edit-content">
+                <form class="edit-content" (ngSubmit)="saveEdit()">
                   <input
                     [(ngModel)]="editingTitle"
+                    name="editTitle"
                     class="edit-input"
                     placeholder="Edit task title"
                     type="text"
+                    required
                   />
-                  <div class="form-group edit-option-group">
-                    <label>Task Status *</label>
+                  <fieldset class="form-group edit-option-group">
+                    <legend>Task Status *</legend>
                     <div class="status-edit-options">
                       <label class="status-radio">
                         <input
@@ -115,9 +124,9 @@
                         <span>✓ Completed</span>
                       </label>
                     </div>
-                  </div>
-                  <div class="form-group edit-option-group">
-                    <label>Task Priority *</label>
+                  </fieldset>
+                  <fieldset class="form-group edit-option-group">
+                    <legend>Task Priority *</legend>
                     <div class="priority-edit-options">
                       <label class="status-radio">
                         <input
@@ -147,8 +156,7 @@
                         <span>🔴 High</span>
                       </label>
                     </div>
-                  </div>
-                </div>
+                  </fieldset>
                 @if (editStatusMessage) {
                   <div
                     class="status-message"
@@ -156,14 +164,17 @@
                     [class.error]="
                       editStatusMessage.includes('Failed') || editStatusMessage.includes('cannot')
                     "
+                    role="status"
+                    aria-live="polite"
                   >
                     {{ editStatusMessage }}
                   </div>
                 }
                 <div class="edit-actions">
-                  <button (click)="saveEdit()" class="btn-save">Save</button>
-                  <button (click)="cancelEdit()" class="btn-cancel">Cancel</button>
+                  <button type="submit" class="btn-save">Save</button>
+                  <button type="button" (click)="cancelEdit()" class="btn-cancel">Cancel</button>
                 </div>
+                </form>
               </li>
             }
           }
@@ -179,22 +190,24 @@
 
   <!-- Delete Confirmation Modal -->
   @if (deletingTaskId) {
-    <div class="modal-overlay">
-      <div class="modal-content">
-        <h3>Delete Task?</h3>
+    <div class="modal-overlay" (keydown.escape)="cancelDelete()">
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="delete-task-title">
+        <h3 id="delete-task-title">Delete Task?</h3>
         <p>Are you sure you want to delete this task? This action cannot be undone.</p>
         @if (deleteStatusMessage) {
           <div
             class="status-message"
             [class.success]="deleteStatusMessage.includes('successfully')"
             [class.error]="deleteStatusMessage.includes('Failed')"
+            role="status"
+            aria-live="polite"
           >
             {{ deleteStatusMessage }}
           </div>
         }
         <div class="modal-actions">
-          <button (click)="confirmDelete()" class="btn-confirm-delete">Delete</button>
-          <button (click)="cancelDelete()" class="btn-cancel-modal">Cancel</button>
+          <button type="button" (click)="confirmDelete()" class="btn-confirm-delete">Delete</button>
+          <button type="button" (click)="cancelDelete()" class="btn-cancel-modal">Cancel</button>
         </div>
       </div>
     </div>

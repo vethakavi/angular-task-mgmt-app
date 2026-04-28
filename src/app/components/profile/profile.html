@@ -1,5 +1,5 @@
 <div class="profile-container">
-  <div class="profile-background">
+  <div class="profile-background" aria-hidden="true">
     <div class="tech-badge badge-angular" data-label="Angular"></div>
     <div class="tech-badge badge-react" data-label="React"></div>
     <div class="tech-badge badge-ts" data-label="TypeScript"></div>
@@ -68,6 +68,8 @@
           [class.success]="statusType === 'success'"
           [class.error]="statusType === 'error'"
           [class.mandatory]="statusType === 'mandatory'"
+          role="status"
+          aria-live="polite"
         >
           {{ statusMessage }}
         </div>
