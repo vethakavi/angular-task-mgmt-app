@@ -5,7 +5,7 @@ import { AddTasks } from './components/add-tasks/add-tasks';
 import { Profile } from './components/profile/profile';
 
 export const routes: Routes = [
-  { path: '', component: Login },
+  { path: '', component: Login, pathMatch: 'full' },
   { path: 'tasks', component: Task },
   { path: 'add-tasks', component: AddTasks },
   { path: 'profile', component: Profile },

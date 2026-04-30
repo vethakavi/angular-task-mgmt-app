@@ -28,7 +28,6 @@ export class UserService {
   }
 
   setSession(token: string, user: any) {
-    console.log('userrr:', user);
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
     this.user.set(user);

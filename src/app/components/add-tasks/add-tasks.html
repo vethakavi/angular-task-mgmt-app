@@ -12,7 +12,11 @@
       <h2>Create New Task</h2>
     </div>
 
-    <form #form class="add-task-form" (ngSubmit)="addTask(titleInput.value, selectedStatus, selectedPriority)">
+    <form
+      #form
+      class="add-task-form"
+      (ngSubmit)="addTask(titleInput.value, selectedStatus, selectedPriority)"
+    >
       <div class="form-group">
         <label for="title">Task Title *</label>
         <input
@@ -48,7 +52,13 @@
         <legend>Task Priority *</legend>
         <div class="priority-options">
           <label class="radio-option">
-            <input type="radio" name="priority" value="low" [(ngModel)]="selectedPriority" checked />
+            <input
+              type="radio"
+              name="priority"
+              value="low"
+              [(ngModel)]="selectedPriority"
+              checked
+            />
             <span class="radio-label">🟢 Low</span>
           </label>
           <label class="radio-option">
@@ -61,11 +71,6 @@
           </label>
         </div>
       </fieldset>
-
-      <!-- <div class="form-group checkbox">
-        <input #completedInput id="completed" type="checkbox" style="display: none" />
-        <label for="completed" style="display: none">Mark as Completed</label>
-      </div> -->
 
       @if (statusMessage) {
         <div

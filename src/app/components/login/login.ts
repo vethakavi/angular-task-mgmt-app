@@ -38,7 +38,6 @@ export class Login {
       this.statusMessage = 'Password is required.';
       this.statusType = 'mandatory';
       this.cdr.detectChanges();
-
       this.clearMessageAfterDelay(3000);
       return;
     }
@@ -49,10 +48,7 @@ export class Login {
 
     this.taskService.login(this.form).subscribe({
       next: (res: any) => {
-        console.log('Login success:', res);
         const token = res.token || res.accessToken || '';
-        console.log('Login succes token:', token);
-
         if (!token) {
           this.statusMessage = '✗ Unable to retrieve login token. Please try again.';
           this.statusType = 'error';
@@ -77,7 +73,6 @@ export class Login {
 
           this.userService.getUserProfile(token).subscribe({
             next: (profile: any) => {
-              console.log('Full profile loaded after login:', profile);
               const profileUser = {
                 ...(profile || {}),
                 id: profile?.id || profile?._id || sessionUser.id,
@@ -95,7 +90,6 @@ export class Login {
         }, 500);
       },
       error: (err: any) => {
-        console.error('Login failed:', err);
         this.isLoading = false;
         if (err.status === 400) {
           this.statusMessage = '✗ Invalid email or password. Please try again.';
@@ -110,7 +104,7 @@ export class Login {
           this.statusMessage = '✗ Login failed. Please check your credentials.';
           this.statusType = 'error';
         }
-        this.cdr.detectChanges(); // ✅ Force loading state to show
+        this.cdr.detectChanges(); // Force loading state to show
         this.clearMessageAfterDelay(3000);
       },
     });
@@ -119,7 +113,7 @@ export class Login {
   private clearMessageAfterDelay(delayMs: number) {
     setTimeout(() => {
       this.statusMessage = '';
-      this.cdr.detectChanges(); // ✅ Force clear message
+      this.cdr.detectChanges(); // Force clear message
     }, delayMs);
   }
 }
