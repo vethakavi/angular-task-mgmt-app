@@ -1,12 +1,13 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
+import { environment } from '../../environments/environment.prod'; // prod for renderer deployment
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
   private http = inject(HttpClient);
-  private API = 'http://localhost:5000/api';
+  private API = environment.apiUrl;
   user = signal<any | null>(this.loadFromStorage());
 
   private loadFromStorage() {

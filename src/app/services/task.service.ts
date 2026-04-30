@@ -1,19 +1,19 @@
 // src/app/services/task.service.ts
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { environment } from '../../environments/environment.prod';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TaskService {
   http = inject(HttpClient);
-  API = 'http://localhost:5000/api';
+  private API = environment.apiUrl;
 
   private getHeaders(token: string) {
     return {
       headers: new HttpHeaders({
-        Authorization: `Bearer ${token}`, // ✅ Bearer prefix added
-        // 'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`, // Bearer prefix added
       }),
     };
   }
