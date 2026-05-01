@@ -65,6 +65,7 @@ export class Login {
             id: res.user?.id || res.user?._id || null,
           };
 
+          console.log('sessionUser after login:', sessionUser);
           this.userService.setSession(token, sessionUser);
           this.statusMessage.set('✓ Login successful!');
           this.statusType.set('success');
@@ -78,10 +79,12 @@ export class Login {
               .pipe(takeUntilDestroyed(this.destroyRef))
               .subscribe({
                 next: (profile: User) => {
+                  console.log('Profile data retrieved after login:', profile);
                   const profileUser: User = {
                     ...(profile || {}),
                     id: profile?.id || profile?._id || sessionUser.id,
                   };
+                  console.log('profileUser after login:', profileUser);
                   this.userService.setSession(token, profileUser);
                 },
                 error: () => {
