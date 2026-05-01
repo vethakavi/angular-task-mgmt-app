@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoginResponse } from '../../models/auth.model';
 import { User } from '../../models/user.model';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -65,7 +66,6 @@ export class Login {
             id: res.user?.id || res.user?._id || null,
           };
 
-          console.log('sessionUser after login:', sessionUser);
           this.userService.setSession(token, sessionUser);
           this.statusMessage.set('✓ Login successful!');
           this.statusType.set('success');
@@ -76,15 +76,13 @@ export class Login {
 
             this.userService
               .getUserProfile()
-              .pipe(takeUntilDestroyed(this.destroyRef))
+              .pipe(take(1))
               .subscribe({
                 next: (profile: User) => {
-                  console.log('Profile data retrieved after login:', profile);
                   const profileUser: User = {
                     ...(profile || {}),
                     id: profile?.id || profile?._id || sessionUser.id,
                   };
-                  console.log('profileUser after login:', profileUser);
                   this.userService.setSession(token, profileUser);
                 },
                 error: () => {
