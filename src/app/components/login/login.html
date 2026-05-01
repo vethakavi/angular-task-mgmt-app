@@ -16,7 +16,8 @@
         <input
           id="email"
           name="email"
-          [(ngModel)]="form.email"
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
           placeholder="Enter your email"
           type="email"
           autocomplete="email"
@@ -31,7 +32,8 @@
         <input
           id="password"
           name="password"
-          [(ngModel)]="form.password"
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
           placeholder="Enter your password"
           type="password"
           autocomplete="current-password"
@@ -41,21 +43,26 @@
         />
       </div>
 
-      @if (statusMessage) {
+      @if (statusMessage()) {
         <div
           class="status-message"
-          [class.success]="statusType === 'success'"
-          [class.error]="statusType === 'error'"
-          [class.mandatory]="statusType === 'mandatory'"
+          [class.success]="statusType() === 'success'"
+          [class.error]="statusType() === 'error'"
+          [class.mandatory]="statusType() === 'mandatory'"
           role="status"
           aria-live="polite"
         >
-          {{ statusMessage }}
+          {{ statusMessage() }}
         </div>
       }
 
-      <button type="submit" class="btn-login" [disabled]="isLoading" [attr.aria-busy]="isLoading">
-        {{ isLoading ? 'Logging in...' : 'Login' }}
+      <button
+        type="submit"
+        class="btn-login"
+        [disabled]="isLoading()"
+        [attr.aria-busy]="isLoading()"
+      >
+        {{ isLoading() ? 'Logging in...' : 'Login' }}
       </button>
     </form>
   </div>

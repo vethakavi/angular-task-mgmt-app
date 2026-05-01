@@ -1,6 +1,8 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { environment } from '../../environments/environment.prod'; // prod for renderer deployment
+import { User } from '../models/user.model';
+import { ProfileUpdateRequest } from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root',
@@ -8,14 +10,14 @@ import { environment } from '../../environments/environment.prod'; // prod for r
 export class UserService {
   private http = inject(HttpClient);
   private API = environment.apiUrl;
-  user = signal<any | null>(this.loadFromStorage());
+  user = signal<User | null>(this.loadFromStorage());
 
-  private loadFromStorage() {
+  private loadFromStorage(): User | null {
     const raw = localStorage.getItem('user');
     return raw ? JSON.parse(raw) : null;
   }
 
-  loadSession() {
+  loadSession(): void {
     if (!this.user()) {
       const raw = localStorage.getItem('user');
       if (raw) {
@@ -24,35 +26,27 @@ export class UserService {
     }
   }
 
-  getToken() {
+  getToken(): string | null {
     return localStorage.getItem('token');
   }
 
-  setSession(token: string, user: any) {
+  setSession(token: string, user: User): void {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
     this.user.set(user);
   }
 
-  clearSession() {
+  clearSession(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     this.user.set(null);
   }
 
-  private getHeaders(token: string) {
-    return {
-      headers: new HttpHeaders({
-        Authorization: `Bearer ${token}`,
-      }),
-    };
+  updateUserProfile(userId: string, profile: ProfileUpdateRequest) {
+    return this.http.put<User>(`${this.API}/auth/user/${userId}`, profile);
   }
 
-  updateUserProfile(token: string, userId: any, profile: any) {
-    return this.http.put(`${this.API}/auth/user/${userId}`, profile, this.getHeaders(token));
-  }
-
-  getUserProfile(token: string) {
-    return this.http.get(`${this.API}/auth/user`, this.getHeaders(token));
+  getUserProfile() {
+    return this.http.get<User>(`${this.API}/auth/user`);
   }
 }

@@ -22,7 +22,7 @@
         <input
           id="name"
           name="name"
-          [(ngModel)]="profileData.name"
+          [(ngModel)]="profileData().name"
           placeholder="Enter your name"
           type="text"
         />
@@ -33,7 +33,7 @@
         <input
           id="email"
           name="email"
-          [(ngModel)]="profileData.email"
+          [(ngModel)]="profileData().email"
           placeholder="Enter your email"
           type="email"
           disabled
@@ -45,7 +45,7 @@
         <input
           id="phone"
           name="phone"
-          [(ngModel)]="profileData.phone"
+          [(ngModel)]="profileData().phone"
           placeholder="Enter your phone number"
           type="text"
         />
@@ -56,28 +56,28 @@
         <textarea
           id="bio"
           name="bio"
-          [(ngModel)]="profileData.bio"
+          [(ngModel)]="profileData().bio"
           placeholder="Tell us something about yourself"
           rows="4"
         ></textarea>
       </div>
 
-      @if (statusMessage) {
+      @if (statusMessage()) {
         <div
           class="status-message"
-          [class.success]="statusType === 'success'"
-          [class.error]="statusType === 'error'"
-          [class.mandatory]="statusType === 'mandatory'"
+          [class.success]="statusType() === 'success'"
+          [class.error]="statusType() === 'error'"
+          [class.mandatory]="statusType() === 'mandatory'"
           role="status"
           aria-live="polite"
         >
-          {{ statusMessage }}
+          {{ statusMessage() }}
         </div>
       }
 
       <div class="button-group">
-        <button class="btn-save" type="submit" [disabled]="isSaving">
-          {{ isSaving ? 'Saving...' : 'Save Changes' }}
+        <button class="btn-save" type="submit" [disabled]="isSaving()">
+          {{ isSaving() ? 'Saving...' : 'Save Changes' }}
         </button>
         <a routerLink="/tasks" class="btn-cancel">← Back to Tasks</a>
       </div>

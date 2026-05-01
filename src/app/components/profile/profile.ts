@@ -1,9 +1,10 @@
-import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { UserService } from '../../services/user.service';
-
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { User } from '../../models/user.model';
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.html',
@@ -12,45 +13,36 @@ import { UserService } from '../../services/user.service';
 })
 export class Profile implements OnInit {
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
   private userService = inject(UserService);
+  private destroyRef = inject(DestroyRef);
 
-  profileData = {
-    name: '',
-    email: '',
-    phone: '',
-    bio: '',
-  };
-
-  statusMessage = '';
-  statusType: 'success' | 'error' | 'mandatory' | null = null;
-  isSaving = false;
+  profileData = signal({ name: '', email: '', phone: '', bio: '' });
+  statusMessage = signal('');
+  statusType = signal<'success' | 'error' | 'mandatory' | null>(null);
+  isSaving = signal(false);
 
   ngOnInit() {
     this.userService.loadSession();
 
     const user = this.userService.user();
-    console.log('user:', user);
 
     if (!user) {
       this.router.navigate(['/']);
       return;
     }
 
-    this.profileData = {
+    this.profileData.set({
       name: user.name || '',
       email: user.email || '',
       phone: user.phone || '',
       bio: user.bio || '',
-    };
+    });
   }
 
   saveProfile() {
-    console.log('SaveClicked');
-    if (!this.profileData.name.trim()) {
-      this.statusMessage = 'Name is required.';
-      this.statusType = 'mandatory';
-      this.cdr.detectChanges();
+    if (!this.profileData().name.trim()) {
+      this.statusMessage.set('Name is required.');
+      this.statusType.set('mandatory');
       return;
     }
 
@@ -65,35 +57,34 @@ export class Profile implements OnInit {
     console.log('userId:', userId);
 
     if (!userId) {
-      this.statusMessage = 'Unable to update profile: missing user ID.';
-      this.statusType = 'error';
+      this.statusMessage.set('Unable to update profile: missing user ID.');
+      this.statusType.set('error');
       return;
     }
 
-    this.isSaving = true;
-    this.statusMessage = '';
-    this.cdr.detectChanges();
+    this.isSaving.set(true);
+    this.statusMessage.set('');
 
-    this.userService.updateUserProfile(token, userId, this.profileData).subscribe({
-      next: (res: any) => {
-        const currentUser = this.userService.user() || {};
-        const updatedUser =
-          res && typeof res === 'object'
-            ? { ...currentUser, ...res }
-            : { ...currentUser, ...this.profileData };
-        this.userService.setSession(token, updatedUser);
-        this.statusMessage = '✓ Profile updated successfully!';
-        this.statusType = 'success';
-        this.isSaving = false;
-        this.cdr.detectChanges();
-      },
-      error: (err: any) => {
-        console.error('Profile update failed:', err);
-        this.statusMessage = '✗ Failed to update profile. Please try again.';
-        this.statusType = 'error';
-        this.isSaving = false;
-        this.cdr.detectChanges();
-      },
-    });
+    this.userService
+      .updateUserProfile(userId, this.profileData())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res: User) => {
+          const currentUser = this.userService.user() || {};
+          const updatedUser =
+            res && typeof res === 'object'
+              ? { ...currentUser, ...res }
+              : { ...currentUser, ...this.profileData() };
+          this.userService.setSession(token, updatedUser);
+          this.statusMessage.set('✓ Profile updated successfully!');
+          this.statusType.set('success');
+          this.isSaving.set(false);
+        },
+        error: () => {
+          this.statusMessage.set('✗ Failed to update profile. Please try again.');
+          this.statusType.set('error');
+          this.isSaving.set(false);
+        },
+      });
   }
 }

@@ -15,7 +15,7 @@
     <form
       #form
       class="add-task-form"
-      (ngSubmit)="addTask(titleInput.value, selectedStatus, selectedPriority)"
+      (ngSubmit)="addTask(titleInput.value, selectedStatus(), selectedPriority())"
     >
       <div class="form-group">
         <label for="title">Task Title *</label>
@@ -72,16 +72,16 @@
         </div>
       </fieldset>
 
-      @if (statusMessage) {
+      @if (statusMessage()) {
         <div
           class="status-message"
-          [class.success]="statusMessage.includes('successfully')"
-          [class.error]="statusMessage.includes('✗')"
-          [class.warning]="statusMessage.includes('Please')"
+          [class.success]="statusMessage().includes('successfully')"
+          [class.error]="statusMessage().includes('✗')"
+          [class.warning]="statusMessage().includes('Please')"
           role="status"
           aria-live="polite"
         >
-          {{ statusMessage }}
+          {{ statusMessage() }}
         </div>
       }
 

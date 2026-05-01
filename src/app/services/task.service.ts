@@ -1,8 +1,9 @@
 // src/app/services/task.service.ts
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment.prod';
-
+import { LoginRequest, LoginResponse } from '../models/auth.model';
+import { CreateTask, Tasks } from '../models/tasks-model';
 @Injectable({
   providedIn: 'root',
 })
@@ -10,24 +11,14 @@ export class TaskService {
   http = inject(HttpClient);
   private API = environment.apiUrl;
 
-  private getHeaders(token: string) {
-    return {
-      headers: new HttpHeaders({
-        Authorization: `Bearer ${token}`, // Bearer prefix added
-      }),
-    };
-  }
+  login = (data: LoginRequest) => this.http.post<LoginResponse>(`${this.API}/auth/login`, data);
 
-  login = (data: any) => this.http.post(`${this.API}/auth/login`, data);
+  getTasks = () => this.http.get<Tasks[]>(`${this.API}/tasks`);
 
-  getTasks = (token: any) => this.http.get(`${this.API}/tasks`, this.getHeaders(token));
+  createTask = (task: CreateTask) => this.http.post<Tasks>(`${this.API}/tasks`, task);
 
-  createTask = (token: any, task: any) =>
-    this.http.post(`${this.API}/tasks`, task, this.getHeaders(token));
+  updateTask = (taskId: string, task: Partial<Tasks>) =>
+    this.http.put<Tasks>(`${this.API}/tasks/${taskId}`, task);
 
-  updateTask = (token: any, taskId: string, task: any) =>
-    this.http.put(`${this.API}/tasks/${taskId}`, task, this.getHeaders(token));
-
-  deleteTask = (token: any, taskId: string) =>
-    this.http.delete(`${this.API}/tasks/${taskId}`, this.getHeaders(token));
+  deleteTask = (taskId: string) => this.http.delete<void>(`${this.API}/tasks/${taskId}`);
 }

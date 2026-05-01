@@ -1,10 +1,11 @@
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
 import { TaskService } from '../../services/task.service';
 import { UserService } from '../../services/user.service';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
-import { Observable } from 'rxjs';
 import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Tasks } from '../../models/tasks-model';
 
 @Component({
   selector: 'app-task',
@@ -15,158 +16,164 @@ import { FormsModule } from '@angular/forms';
 export class Task implements OnInit {
   taskService = inject(TaskService);
   userService = inject(UserService);
-  private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
+
   readonly currentUser = this.userService.user;
-  tasks$!: Observable<any>;
-  tasks: any[] = [];
 
-  // UI state
-  userDropdownOpen = false;
+  tasks = signal<Tasks[]>([]);
+  userDropdownOpen = signal(false);
+  editingTaskId = signal<string | null>(null);
 
-  // Edit state
-  editingTaskId: string | null = null;
-  editingTitle = '';
-  editingStatus = 'todo';
-  editingPriority = 'low';
-  editingCompleted = false;
-  editStatusMessage = '';
+  editingTitle = signal('');
+  editingStatus = signal<'todo' | 'inprogress' | 'completed'>('todo');
+  editingPriority = signal<'low' | 'medium' | 'high'>('low');
+  editStatusMessage = signal('');
 
-  // Delete state
-  deletingTaskId: string | null = null;
-  deleteStatusMessage = '';
+  deletingTaskId = signal<string | null>(null);
+  deleteStatusMessage = signal('');
 
-  hasLoaded: boolean = false;
-
-  token: string | null = null;
+  hasLoaded = signal(false);
 
   ngOnInit() {
     this.userService.loadSession();
-    this.token = this.userService.getToken();
-    if (!this.token) {
+
+    if (!this.userService.getToken()) {
       this.router.navigate(['/']);
       return;
     }
+
     this.loadTasks();
   }
 
   toggleUserMenu() {
-    this.userDropdownOpen = !this.userDropdownOpen;
+    this.userDropdownOpen.update((open) => !open);
   }
 
   logout() {
-    this.userDropdownOpen = false;
+    this.userDropdownOpen.set(false);
     this.userService.clearSession();
     this.router.navigate(['/']);
   }
 
-  loadTasks() {
-    this.hasLoaded = false;
-    if (this.token) {
-      this.tasks$ = this.taskService.getTasks(this.token);
-      this.tasks$.subscribe((tasks) => {
-        this.tasks = tasks;
-        this.hasLoaded = true;
-        this.cdr.markForCheck();
+  loadTasks(): void {
+    this.hasLoaded.set(false);
+
+    this.taskService
+      .getTasks()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (tasks: Tasks[]) => {
+          this.tasks.set(tasks);
+          this.hasLoaded.set(true);
+        },
+        error: (err: unknown) => {
+          console.error('Failed to load tasks:', err);
+          this.hasLoaded.set(true);
+        },
       });
-    }
   }
 
-  startEdit(task: any) {
-    this.editingTaskId = task._id;
-    this.editingTitle = task.title;
-    this.editingStatus = task.status || 'todo';
-    this.editingPriority = task.priority || 'low';
-    this.editingCompleted = task.completed;
-    this.editStatusMessage = '';
+  startEdit(task: Tasks): void {
+    this.editingTaskId.set(task._id);
+    this.editingTitle.set(task.title);
+    this.editingStatus.set(task.status || 'todo');
+    this.editingPriority.set(task.priority || 'low');
+    this.editStatusMessage.set('');
   }
 
   cancelEdit() {
-    this.editingTaskId = null;
-    this.editingTitle = '';
-    this.editingStatus = 'todo';
-    this.editingPriority = 'low';
-    this.editingCompleted = false;
-    this.editStatusMessage = '';
+    this.editingTaskId.set(null);
+    this.editingTitle.set('');
+    this.editingStatus.set('todo');
+    this.editingPriority.set('low');
+    this.editStatusMessage.set('');
   }
 
   saveEdit() {
-    if (!this.editingTitle.trim()) {
-      this.editStatusMessage = '✗ Task title cannot be empty.';
+    const editingTaskId = this.editingTaskId();
+    const title = this.editingTitle();
+
+    if (!title.trim()) {
+      this.editStatusMessage.set('✗ Task title cannot be empty.');
       this.clearMessageAfterDelay('edit', 3000);
       return;
     }
 
-    if (!this.token || !this.editingTaskId) {
+    if (!editingTaskId) {
       return;
     }
 
-    this.editStatusMessage = 'Updating...';
+    this.editStatusMessage.set('Updating...');
     const payload = {
-      title: this.editingTitle,
-      status: this.editingStatus,
-      priority: this.editingPriority,
-      completed: this.editingCompleted,
+      title,
+      status: this.editingStatus(),
+      priority: this.editingPriority(),
     };
 
-    this.taskService.updateTask(this.token, this.editingTaskId, payload).subscribe({
-      next: (res) => {
-        this.editStatusMessage = '✓ Task updated successfully!';
-        this.cdr.markForCheck();
-        setTimeout(() => {
-          this.loadTasks();
-          this.cancelEdit();
-        }, 500);
-      },
-      error: (err) => {
-        console.error('Update failed:', err);
-        this.editStatusMessage = '✗ Failed to update task.';
-        this.clearMessageAfterDelay('edit', 3000);
-      },
-    });
+    this.taskService
+      .updateTask(editingTaskId, payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.editStatusMessage.set('✓ Task updated successfully!');
+          setTimeout(() => {
+            this.loadTasks();
+            this.cancelEdit();
+          }, 500);
+        },
+        error: (err) => {
+          console.error('Update failed:', err);
+          this.editStatusMessage.set('✗ Failed to update task.');
+          this.clearMessageAfterDelay('edit', 3000);
+        },
+      });
   }
 
   startDelete(taskId: string) {
-    this.deletingTaskId = taskId;
-    this.deleteStatusMessage = '';
+    this.deletingTaskId.set(taskId);
+    this.deleteStatusMessage.set('');
   }
 
   cancelDelete() {
-    this.deletingTaskId = null;
-    this.deleteStatusMessage = '';
+    this.deletingTaskId.set(null);
+    this.deleteStatusMessage.set('');
   }
 
   confirmDelete() {
-    if (!this.token || !this.deletingTaskId) {
+    const deletingTaskId = this.deletingTaskId();
+
+    if (!deletingTaskId) {
       return;
     }
 
-    this.deleteStatusMessage = 'Deleting...';
-    this.taskService.deleteTask(this.token, this.deletingTaskId).subscribe({
-      next: (res) => {
-        this.deleteStatusMessage = '✓ Task deleted successfully!';
-        this.cdr.markForCheck();
-        setTimeout(() => {
-          this.loadTasks();
-          this.cancelDelete();
-        }, 500);
-      },
-      error: (err) => {
-        console.error('Delete failed:', err);
-        this.deleteStatusMessage = '✗ Failed to delete task.';
-        this.clearMessageAfterDelay('delete', 3000);
-      },
-    });
+    this.deleteStatusMessage.set('Deleting...');
+    this.taskService
+      .deleteTask(deletingTaskId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.deleteStatusMessage.set('✓ Task deleted successfully!');
+          setTimeout(() => {
+            this.loadTasks();
+            this.cancelDelete();
+          }, 500);
+        },
+        error: (err) => {
+          console.error('Delete failed:', err);
+          this.deleteStatusMessage.set('✗ Failed to delete task.');
+          this.clearMessageAfterDelay('delete', 3000);
+        },
+      });
   }
 
   private clearMessageAfterDelay(type: 'edit' | 'delete', delayMs: number) {
     setTimeout(() => {
       if (type === 'edit') {
-        this.editStatusMessage = '';
+        this.editStatusMessage.set('');
       } else {
-        this.deleteStatusMessage = '';
+        this.deleteStatusMessage.set('');
       }
-      this.cdr.markForCheck();
     }, delayMs);
   }
 }
