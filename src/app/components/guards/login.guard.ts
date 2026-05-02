@@ -1,21 +1,22 @@
-import { Router } from '@angular/router';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
 
-export const authGuard = () => {
+export const loginGuard = () => {
   const userService = inject(UserService);
   const router = inject(Router);
 
   if (userService.user()) {
-    return true;
+    router.navigate(['/tasks']);
+    return false;
   }
 
   const raw = sessionStorage.getItem('user');
   if (raw) {
     userService.loadSession();
-    return true;
+    router.navigate(['/tasks']);
+    return false;
   }
 
-  router.navigate(['/login']);
-  return false;
+  return true;
 };

@@ -1,11 +1,11 @@
-import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { TaskService } from '../../services/task.service';
 import { UserService } from '../../services/user.service';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Tasks } from '../../models/tasks-model';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-task',
@@ -17,8 +17,6 @@ export class Task implements OnInit {
   taskService = inject(TaskService);
   userService = inject(UserService);
   private router = inject(Router);
-  private destroyRef = inject(DestroyRef);
-
   readonly currentUser = this.userService.user;
 
   tasks = signal<Tasks[]>([]);
@@ -37,12 +35,6 @@ export class Task implements OnInit {
 
   ngOnInit() {
     this.userService.loadSession();
-
-    if (!this.userService.getToken()) {
-      this.router.navigate(['/']);
-      return;
-    }
-
     this.loadTasks();
   }
 
@@ -61,7 +53,7 @@ export class Task implements OnInit {
 
     this.taskService
       .getTasks()
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(take(1))
       .subscribe({
         next: (tasks: Tasks[]) => {
           this.tasks.set(tasks);
@@ -113,7 +105,7 @@ export class Task implements OnInit {
 
     this.taskService
       .updateTask(editingTaskId, payload)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(take(1))
       .subscribe({
         next: () => {
           this.editStatusMessage.set('✓ Task updated successfully!');
@@ -150,7 +142,7 @@ export class Task implements OnInit {
     this.deleteStatusMessage.set('Deleting...');
     this.taskService
       .deleteTask(deletingTaskId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(take(1))
       .subscribe({
         next: () => {
           this.deleteStatusMessage.set('✓ Task deleted successfully!');

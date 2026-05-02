@@ -1,10 +1,8 @@
-import { Component, inject, signal, DestroyRef } from '@angular/core';
-import { TaskService } from '../../services/task.service';
+import { Component, inject, signal } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoginResponse } from '../../models/auth.model';
 import { User } from '../../models/user.model';
 import { take } from 'rxjs';
@@ -22,10 +20,8 @@ export class Login {
   statusType = signal<'success' | 'error' | 'mandatory' | null>(null);
   isLoading = signal(false);
 
-  taskService = inject(TaskService);
   userService = inject(UserService);
   router = inject(Router);
-  private destroyRef = inject(DestroyRef);
 
   loginUser() {
     this.statusMessage.set(null);
@@ -48,32 +44,22 @@ export class Login {
     this.isLoading.set(true);
     this.statusMessage.set('');
 
-    this.taskService
+    this.userService
       .login({ email: this.email(), password: this.password() })
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(take(1))
       .subscribe({
         next: (res: LoginResponse) => {
-          const token = res.token || res.accessToken || '';
-          if (!token) {
-            this.statusMessage.set('✗ Unable to retrieve login token. Please try again.');
-            this.statusType.set('error');
-            this.isLoading.set(false);
-            return;
-          }
-
           const sessionUser: User = {
             ...(res.user || { email: this.email() }),
             id: res.user?.id || res.user?._id || null,
           };
 
-          this.userService.setSession(token, sessionUser);
+          this.userService.setSession(sessionUser);
           this.statusMessage.set('✓ Login successful!');
           this.statusType.set('success');
           this.isLoading.set(false);
 
           if (!res.user || !sessionUser.id) {
-            console.log('Fetching full profile because login user data is incomplete.');
-
             this.userService
               .getUserProfile()
               .pipe(take(1))
@@ -83,17 +69,17 @@ export class Login {
                     ...(profile || {}),
                     id: profile?.id || profile?._id || sessionUser.id,
                   };
-                  this.userService.setSession(token, profileUser);
+                  this.userService.setSession(profileUser);
+                  this.navigateToTasks();
                 },
-                error: () => {
-                  // fallback to partial session if profile lookup fails
+                error: (err) => {
+                  console.error('Profile fetch failed:', err);
+                  this.navigateToTasks();
                 },
               });
+          } else {
+            this.navigateToTasks();
           }
-
-          setTimeout(() => {
-            this.router.navigate(['/tasks']);
-          }, 500);
         },
         error: (err: unknown) => {
           this.isLoading.set(false);
@@ -116,6 +102,13 @@ export class Login {
       });
   }
 
+  private navigateToTasks() {
+    setTimeout(() => {
+      this.router.navigate(['/tasks']).then((result) => {
+        console.log('Navigation result:', result);
+      });
+    }, 500);
+  }
   private clearMessageAfterDelay(delayMs: number) {
     setTimeout(() => {
       this.statusMessage.set('');

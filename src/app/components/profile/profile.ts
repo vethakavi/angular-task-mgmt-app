@@ -1,10 +1,10 @@
-import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { UserService } from '../../services/user.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { User } from '../../models/user.model';
+import { take } from 'rxjs';
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.html',
@@ -14,7 +14,6 @@ import { User } from '../../models/user.model';
 export class Profile implements OnInit {
   private router = inject(Router);
   private userService = inject(UserService);
-  private destroyRef = inject(DestroyRef);
 
   profileData = signal({ name: '', email: '', phone: '', bio: '' });
   statusMessage = signal('');
@@ -23,11 +22,10 @@ export class Profile implements OnInit {
 
   ngOnInit() {
     this.userService.loadSession();
-
     const user = this.userService.user();
 
     if (!user) {
-      this.router.navigate(['/']);
+      this.router.navigate(['/login']);
       return;
     }
 
@@ -46,15 +44,8 @@ export class Profile implements OnInit {
       return;
     }
 
-    const token = this.userService.getToken();
-    if (!token) {
-      this.router.navigate(['/']);
-      return;
-    }
-
     const user = this.userService.user();
     const userId = user?.id || user?._id || null;
-    console.log('userId:', userId);
 
     if (!userId) {
       this.statusMessage.set('Unable to update profile: missing user ID.');
@@ -67,7 +58,7 @@ export class Profile implements OnInit {
 
     this.userService
       .updateUserProfile(userId, this.profileData())
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(take(1))
       .subscribe({
         next: (res: User) => {
           const currentUser = this.userService.user() || {};
@@ -75,7 +66,7 @@ export class Profile implements OnInit {
             res && typeof res === 'object'
               ? { ...currentUser, ...res }
               : { ...currentUser, ...this.profileData() };
-          this.userService.setSession(token, updatedUser);
+          this.userService.setSession(updatedUser);
           this.statusMessage.set('✓ Profile updated successfully!');
           this.statusType.set('success');
           this.isSaving.set(false);
