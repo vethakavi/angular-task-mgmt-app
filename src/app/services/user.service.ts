@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { environment } from '../../environments/environment'; // prod for renderer deployment
+import { environment } from '../../environments/environment.prod'; // prod for renderer deployment
 import { User, RegisterRequest } from '../models/user.model';
 import { LoginRequest, LoginResponse, ProfileUpdateRequest } from '../models/auth.model';
 
