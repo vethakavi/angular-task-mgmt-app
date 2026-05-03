@@ -1,5 +1,5 @@
-<div class="profile-container">
-  <div class="profile-background" aria-hidden="true">
+<div class="register-container">
+  <div class="register-background" aria-hidden="true">
     <div class="tech-badge badge-angular" data-label="Angular"></div>
     <div class="tech-badge badge-react" data-label="React"></div>
     <div class="tech-badge badge-ts" data-label="TypeScript"></div>
@@ -7,16 +7,12 @@
     <div class="tech-badge badge-graphql" data-label="GraphQL"></div>
   </div>
 
-  <div class="profile-card">
+  <div class="register-card">
     <div class="card-header">
-      <h2>Update Profile</h2>
+      <h2>Create Account</h2>
     </div>
 
-    <div class="profile-header">
-      <p>Update your account details and keep your session information current.</p>
-    </div>
-
-    <form class="profile-form" (ngSubmit)="saveProfile()">
+    <form class="register-form" (ngSubmit)="registerUser()">
       <div class="form-row">
         <div class="form-group">
           <label for="firstName">First Name <span class="required-indicator">*</span></label>
@@ -48,7 +44,7 @@
       </div>
 
       <div class="form-group">
-        <label for="email">Email</label>
+        <label for="email">Email <span class="required-indicator">*</span></label>
         <input
           id="email"
           name="email"
@@ -56,7 +52,38 @@
           (ngModelChange)="email.set($event)"
           placeholder="Enter your email"
           type="email"
-          disabled
+          required
+          aria-required="true"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password <span class="required-indicator">*</span></label>
+        <input
+          id="password"
+          name="password"
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
+          placeholder="Enter a password"
+          type="password"
+          required
+          aria-required="true"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword"
+          >Confirm Password <span class="required-indicator">*</span></label
+        >
+        <input
+          id="confirmPassword"
+          name="confirmPassword"
+          [ngModel]="confirmPassword()"
+          (ngModelChange)="confirmPassword.set($event)"
+          placeholder="Confirm your password"
+          type="password"
+          required
+          aria-required="true"
         />
       </div>
 
@@ -88,11 +115,20 @@
       }
 
       <div class="button-group">
-        <button class="btn-save" type="submit" [disabled]="isSaving()">
-          {{ isSaving() ? 'Saving...' : 'Save Changes' }}
+        <button
+          type="submit"
+          class="btn-submit"
+          [disabled]="isSubmitting()"
+          [attr.aria-busy]="isSubmitting()"
+        >
+          {{ isSubmitting() ? 'Registering...' : 'Create Account' }}
         </button>
-        <a routerLink="/tasks" class="btn-cancel">← Back to Tasks</a>
       </div>
     </form>
+
+    <div class="login-footer">
+      Already have an account?
+      <a [routerLink]="['/login']" class="login-link">Login</a>
+    </div>
   </div>
 </div>

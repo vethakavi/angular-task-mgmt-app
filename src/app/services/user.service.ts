@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { environment } from '../../environments/environment.prod'; // prod for renderer deployment
-import { User } from '../models/user.model';
+import { environment } from '../../environments/environment'; // prod for renderer deployment
+import { User, RegisterRequest } from '../models/user.model';
 import { LoginRequest, LoginResponse, ProfileUpdateRequest } from '../models/auth.model';
 
 @Injectable({
@@ -40,8 +40,22 @@ export class UserService {
     return this.http.post<LoginResponse>(`${this.API}/auth/login`, data);
   }
 
+  register(data: RegisterRequest) {
+    return this.http.post<User>(`${this.API}/auth/register`, data);
+  }
+
   updateUserProfile(userId: string, profile: ProfileUpdateRequest) {
     return this.http.put<User>(`${this.API}/auth/user/${userId}`, profile);
+  }
+
+  checkUserExists(email: string) {
+    return this.http.get<{ exists: boolean }>(
+      `${this.API}/auth/user/exists?email=${encodeURIComponent(email)}`,
+    );
+  }
+
+  resetPassword(data: { email: string; password: string }) {
+    return this.http.post(`${this.API}/auth/reset-password`, data);
   }
 
   getUserProfile() {

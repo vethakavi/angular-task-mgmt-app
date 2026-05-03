@@ -5,13 +5,12 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  token: string;
-  accessToken?: string;
   user?: User;
+  message?: string;
 }
 export interface ProfileUpdateRequest {
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   email?: string;
-  phone?: string;
-  bio?: string;
+  phoneNo?: number;
 }

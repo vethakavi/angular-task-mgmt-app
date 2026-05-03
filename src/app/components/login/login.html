@@ -65,5 +65,14 @@
         {{ isLoading() ? 'Logging in...' : 'Login' }}
       </button>
     </form>
+
+    <div class="forgot-footer">
+      <a [routerLink]="['/forgot-password']" class="forgot-link">Forgot Password?</a>
+    </div>
+
+    <div class="register-footer">
+      Do not have an account?
+      <a [routerLink]="['/register']" class="register-link">Register</a>
+    </div>
   </div>
 </div>

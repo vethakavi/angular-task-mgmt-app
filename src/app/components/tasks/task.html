@@ -17,9 +17,9 @@
         aria-controls="user-menu-dropdown"
       >
         <span class="avatar">{{
-          currentUser()?.name ? currentUser()?.name?.charAt(0)?.toUpperCase() : 'U'
+          userFullName() ? userFullName().charAt(0).toUpperCase() : 'U'
         }}</span>
-        <span class="user-name">{{ currentUser()?.name || currentUser()?.email || 'User' }}</span>
+        <span class="user-name">{{ userFullName() }}</span>
         <span class="user-caret">▾</span>
       </button>
       @if (userDropdownOpen()) {

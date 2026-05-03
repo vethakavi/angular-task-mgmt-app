@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { TaskService } from '../../services/task.service';
 import { UserService } from '../../services/user.service';
 import { CommonModule } from '@angular/common';
@@ -32,6 +32,14 @@ export class Task implements OnInit {
   deleteStatusMessage = signal('');
 
   hasLoaded = signal(false);
+
+  userFullName = computed(() => {
+    const user = this.currentUser();
+    if (!user) return 'User';
+    if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName}`;
+    if (user.firstName) return user.firstName;
+    return user.email ?? 'User';
+  });
 
   ngOnInit() {
     this.userService.loadSession();
